@@ -53,11 +53,11 @@ public class LanguageModel {
             if (c == '\r') {
                 continue;
             }
-            
+
             List probs = CharDataMap.get(window);
             if (probs == null) {
-            probs = new List();
-            CharDataMap.put(window, probs);
+                probs = new List();
+                CharDataMap.put(window, probs);
             }
             probs.update(c);
             window = window.substring(1) + c;
@@ -122,7 +122,7 @@ public class LanguageModel {
         }
 
         StringBuilder generatedText = new StringBuilder(initialText);
-        while (generatedText.length() < textLength || generatedText.charAt(generatedText.length()-1) != ' ') {
+        while (generatedText.length() < textLength || generatedText.charAt(generatedText.length() - 1) != ' ') {
             String window = generatedText.substring(generatedText.length() - windowLength);
             List probs = CharDataMap.get(window);
             if (probs == null) {
@@ -154,9 +154,9 @@ public class LanguageModel {
         // Create the LanguageModel object
         LanguageModel lm;
         if (randomGeneration) {
-        lm = new LanguageModel(windowLength);
+            lm = new LanguageModel(windowLength);
         } else {
-        lm = new LanguageModel(windowLength, 20);
+            lm = new LanguageModel(windowLength, 20);
         }
 
         // Trains the model, creating the map.
