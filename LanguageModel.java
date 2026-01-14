@@ -42,23 +42,33 @@ public class LanguageModel {
         In in = new In(fileName);
 
         // Reads the first window from the file.
-        for (int i = 0; i < windowLength; i++) {
+        for (int i = 0; i < windowLength && !in.isEmpty(); i++) {
             window += in.readChar();
         }
 
         // Processes the entire text, one character at a time.
         while (!in.isEmpty()) {
             c = in.readChar();
+
+            if (c == '\r') {
+                continue;
+            }
+            
             List probs = CharDataMap.get(window);
             if (probs == null) {
-                probs = new List();
-                CharDataMap.put(window, probs);
+            probs = new List();
+            CharDataMap.put(window, probs);
             }
             probs.update(c);
             window = window.substring(1) + c;
+
+            // if (c == '\n' || c == '\r') {
+            // System.out.println("Found line ending char: " + (int)c);
+            // }
         }
 
-        // Computes and set the p and cp fields of all the linked list objects in the map.
+        // Computes and set the p and cp fields of all the linked list objects in the
+        // map.
         for (List probs : CharDataMap.values()) {
             calculateProbabilities(probs);
         }
@@ -67,18 +77,18 @@ public class LanguageModel {
     // Computes and sets the probabilities (p and cp fields) of all the
     // characters in the given list. */
     void calculateProbabilities(List probs) {
-        int numChars = 0;
-        ListIterator it = probs.listIterator(0);
-        while (it.hasNext()) {
-            CharData current = it.next();
-            numChars += current.count;
+        int totalCount = 0;
+        ListIterator itCount = probs.listIterator(0);
+        while (itCount.hasNext()) {
+            CharData current = itCount.next();
+            totalCount += current.count;
         }
 
-        ListIterator it2 = probs.listIterator(0);
+        ListIterator itProb = probs.listIterator(0);
         double prevCP = 0.0;
-        while (it2.hasNext()) {
-            CharData current = it2.next();
-            current.p = (double) current.count / numChars;
+        while (itProb.hasNext()) {
+            CharData current = itProb.next();
+            current.p = (double) current.count / totalCount;
             current.cp = prevCP + current.p;
             prevCP = current.cp;
         }
@@ -115,14 +125,17 @@ public class LanguageModel {
             return initialText;
         }
 
-        String generatedText = initialText;
+        StringBuilder generatedText = new StringBuilder(initialText);
         while (generatedText.length() < textLength) {
             String window = generatedText.substring(generatedText.length() - windowLength);
             List probs = CharDataMap.get(window);
+            if (probs == null) {
+                break;
+            }
             char nextRandomChar = getRandomChar(probs);
-            generatedText += nextRandomChar;
+            generatedText.append(nextRandomChar);
         }
-        return generatedText;
+        return generatedText.toString();
     }
 
     /** Returns a string representing the map of this language model. */
@@ -136,6 +149,49 @@ public class LanguageModel {
     }
 
     public static void main(String[] args) {
-        // Your code goes here
+        // int windowLength = Integer.parseInt(args[0]);
+        // String initialText = args[1];
+        // int generatedTextLength = Integer.parseInt(args[2]);
+        // Boolean randomGeneration = args[3].equals("random");
+        // String fileName = args[4];
+
+        // // Create the LanguageModel object
+        // LanguageModel lm;
+        // if (randomGeneration) {
+        // lm = new LanguageModel(windowLength);
+        // } else {
+        // lm = new LanguageModel(windowLength, 20);
+        // }
+
+        // // Trains the model, creating the map.
+        // lm.train(fileName);
+
+        // // Generating text, and prints it.
+        // System.out.println(lm.generate(initialText, generatedTextLength));
+
+        System.out.println(testGenerate());
+    }
+
+    public static boolean testGenerate() {
+        LanguageModel languageModel = new LanguageModel(7, 20);
+        languageModel.train("originofspecies.txt");
+        String generatedText = languageModel.generate("Natural", 172);
+        String expectedGeneratedText = "Natural selection, how is it possible, generally much changed\n" +
+                "simultaneous rotation, when the importance of Batrachians, 393.\n" +
+                "  Batrachians (frogs, toads, newts) have to modified ";
+
+        boolean res = stringEqualsNoSpaces(generatedText, expectedGeneratedText);
+        if (!res) {
+            System.out.println("Expected: " + expectedGeneratedText);
+            System.out.println("Actual: " + generatedText);
+            System.out.println("FAIL with windowLength = 7, seed = 20, initialText = Natural, textLength = 172");
+        }
+        return res;
+    }
+
+    private static boolean stringEqualsNoSpaces(String s1, String s2) {
+        s1 = s1.replaceAll("\\s+", "");
+        s2 = s2.replaceAll("\\s+", "");
+        return s1.equals(s2);
     }
 }
