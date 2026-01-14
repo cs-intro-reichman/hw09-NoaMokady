@@ -111,8 +111,18 @@ public class LanguageModel {
      * @return the generated text
      */
     public String generate(String initialText, int textLength) {
-        // Your code goes here
-        return "";
+        if (initialText.length() < windowLength) {
+            return initialText;
+        }
+
+        String generatedText = initialText;
+        while (generatedText.length() < textLength) {
+            String window = generatedText.substring(generatedText.length() - windowLength);
+            List probs = CharDataMap.get(window);
+            char nextRandomChar = getRandomChar(probs);
+            generatedText += nextRandomChar;
+        }
+        return generatedText;
     }
 
     /** Returns a string representing the map of this language model. */
