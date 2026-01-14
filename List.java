@@ -1,4 +1,3 @@
-
 /**
  * A linked list of character data objects.
  * (Actually, a list of Node objects, each holding a reference to a character
@@ -30,7 +29,9 @@ public class List {
 
     /** Returns the CharData of the first element in this list. */
     public CharData getFirst() {
-        // Your code goes here
+        if (first == null) {
+            return null;
+        }
         return first.cp;
     }
 
@@ -49,13 +50,17 @@ public class List {
 
     /** GIVE Textual representation of this list. */
     public String toString() {
-        String res = "";
+        StringBuilder res = new StringBuilder("(");
         Node current = first;
         while (current != null) {
-            res += "\n" + current.cp.toString();
+            res.append(current.cp.toString());
             current = current.next;
+            if (current != null) {
+                res.append(" ");
+            }
         }
-        return res;
+        res.append(")");
+        return res.toString();
     }
 
     /**
@@ -90,7 +95,8 @@ public class List {
             }
             current = current.next;
         }
-        // If the given character doesn't exist in one of the CharData objects in this list, adds it.
+        // If the given character doesn't exist in one of the CharData objects in this
+        // list, adds it.
         addFirst(chr);
     }
 
@@ -105,11 +111,12 @@ public class List {
         while (current != null) {
             if (current.cp.chr == chr) {
                 if (prev == null) {
-                    first = null;
+                    first = current.next;
                 } else {
                     prev.next = current.next;
                     current = current.next;
                 }
+                size--;
                 return true;
             } else {
                 prev = current;
@@ -125,7 +132,7 @@ public class List {
      * throws an IndexOutOfBoundsException.
      */
     public CharData get(int index) {
-        if (index < 0 || index > size) {
+        if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException(
                     "The CharData object's index is negative or greater than the size of this list");
         }
