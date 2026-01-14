@@ -61,10 +61,6 @@ public class LanguageModel {
             }
             probs.update(c);
             window = window.substring(1) + c;
-
-            // if (c == '\n' || c == '\r') {
-            // System.out.println("Found line ending char: " + (int)c);
-            // }
         }
 
         // Computes and set the p and cp fields of all the linked list objects in the
@@ -126,7 +122,7 @@ public class LanguageModel {
         }
 
         StringBuilder generatedText = new StringBuilder(initialText);
-        while (generatedText.length() < textLength) {
+        while (generatedText.length() < textLength || generatedText.charAt(generatedText.length()-1) != ' ') {
             String window = generatedText.substring(generatedText.length() - windowLength);
             List probs = CharDataMap.get(window);
             if (probs == null) {
@@ -149,49 +145,24 @@ public class LanguageModel {
     }
 
     public static void main(String[] args) {
-        // int windowLength = Integer.parseInt(args[0]);
-        // String initialText = args[1];
-        // int generatedTextLength = Integer.parseInt(args[2]);
-        // Boolean randomGeneration = args[3].equals("random");
-        // String fileName = args[4];
+        int windowLength = Integer.parseInt(args[0]);
+        String initialText = args[1];
+        int generatedTextLength = Integer.parseInt(args[2]);
+        Boolean randomGeneration = args[3].equals("random");
+        String fileName = args[4];
 
-        // // Create the LanguageModel object
-        // LanguageModel lm;
-        // if (randomGeneration) {
-        // lm = new LanguageModel(windowLength);
-        // } else {
-        // lm = new LanguageModel(windowLength, 20);
-        // }
-
-        // // Trains the model, creating the map.
-        // lm.train(fileName);
-
-        // // Generating text, and prints it.
-        // System.out.println(lm.generate(initialText, generatedTextLength));
-
-        System.out.println(testGenerate());
-    }
-
-    public static boolean testGenerate() {
-        LanguageModel languageModel = new LanguageModel(7, 20);
-        languageModel.train("originofspecies.txt");
-        String generatedText = languageModel.generate("Natural", 172);
-        String expectedGeneratedText = "Natural selection, how is it possible, generally much changed\n" +
-                "simultaneous rotation, when the importance of Batrachians, 393.\n" +
-                "  Batrachians (frogs, toads, newts) have to modified ";
-
-        boolean res = stringEqualsNoSpaces(generatedText, expectedGeneratedText);
-        if (!res) {
-            System.out.println("Expected: " + expectedGeneratedText);
-            System.out.println("Actual: " + generatedText);
-            System.out.println("FAIL with windowLength = 7, seed = 20, initialText = Natural, textLength = 172");
+        // Create the LanguageModel object
+        LanguageModel lm;
+        if (randomGeneration) {
+        lm = new LanguageModel(windowLength);
+        } else {
+        lm = new LanguageModel(windowLength, 20);
         }
-        return res;
-    }
 
-    private static boolean stringEqualsNoSpaces(String s1, String s2) {
-        s1 = s1.replaceAll("\\s+", "");
-        s2 = s2.replaceAll("\\s+", "");
-        return s1.equals(s2);
+        // Trains the model, creating the map.
+        lm.train(fileName);
+
+        // Generating text, and prints it.
+        System.out.println(lm.generate(initialText, generatedTextLength));
     }
 }
